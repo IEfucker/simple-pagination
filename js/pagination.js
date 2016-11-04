@@ -16,7 +16,7 @@
             last: "last",
             prev: "prev",
             next: "next",
-            goto: 'go'
+            goTo: 'go'
         },
         callback: emptyFunc
     }
@@ -44,6 +44,7 @@
         self.getPage = function(num) {
             if (!num || isNaN(num)) throw Error('pageNumber error')
             if (+num < 1 || +num > self.lastNum) return
+            opt.currentNum = num
             var params = 'date=' + date + '&page=' + num + '&size=' + opt.pageSize
 
             $.ajax({
@@ -70,7 +71,7 @@
             html += '<li class="pagi-item"><a href="#" class="pagi-link pagi-next' + ((lastNum == currentNum) ? " disabled" : "") + '">' + label.next + '</a></li>'
             html += '<li class="pagi-item"><a href="#" class="pagi-link pagi-last' + ((lastNum == currentNum) ? " disabled" : "") + '">' + label.last + '</a></li>'
             html += '<li class="pagi-item"><input type="text" class="pagi-goto-num" value="' + currentNum + '">'
-            html += '<a class="pagi-link pagi-goto-btn" href="#">' + label.goto + '</a></li></ul></div>'
+            html += '<a class="pagi-link pagi-goto-btn" href="#">' + label.goTo + '</a></li></ul></div>'
 
             c.html(html)
 
