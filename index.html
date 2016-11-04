@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>demo</title>
+    <!-- demo style -->
+    <style>
+    	.pagi-contain{
+    		padding:10px;
+    		background: #ccc;
+    		font-size:.8rem;
+    	}
+    	.page-contain{
+    		padding: 30px;
+    	}
+    </style>
+    <!-- lib style -->
+    <link rel="stylesheet" href="css/pagination.css">
+
+    
+    
+    
+</head>
+
+<body>
+	<div class="pagi-wrapper">
+		
+	</div>
+    
+    <div class="page-contain">
+    	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequuntur iure ex magnam itaque deleniti, exercitationem adipisci delectus vero aperiam. Aliquam obcaecati deleniti blanditiis non fugiat nulla, earum nobis molestias quis?</p>
+    </div>
+
+
+    <script src="js/jquery-1.12.4.min.js"></script>
+    <script src="js/pagination.js"></script>
+    <script>
+    	new Pagination({
+    		container: '.pagi-wrapper',
+    		url: '/data/data.json',
+    		dataType: 'json',
+    		label:{
+    			first:"首页",
+    			last:"尾页",
+    			prev:"上一页",
+    			next:"下一页",
+    			goto:'跳转'
+    		},
+    		callback: function(res){
+    			// console.log(res)
+    		}
+    	})
+    </script>
+</body>
+
+</html>
