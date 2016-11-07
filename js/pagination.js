@@ -43,6 +43,8 @@
                 }
             }
 
+        self.opt = opt
+
         self.getPage = function(num) {
             if (!num || isNaN(num)) throw Error('pageNumber error')
             if (+num < 1 || +num > self.lastNum) return
@@ -74,19 +76,19 @@
             //event bind
             $('.pagi-contain').find('.pagi-first').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
-                self.goto(1)
+                self.gotoFirst()
             })
             $('.pagi-contain').find('.pagi-prev').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
-                self.goto(opt.currentNum - 1)
+                self.prev()
             })
             $('.pagi-contain').find('.pagi-next').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
-                self.goto(opt.currentNum + 1)
+                self.next()
             })
             $('.pagi-contain').find('.pagi-last').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
-                self.goto(opt.totalNum)
+                self.gotoLast()
             })
         }
 
@@ -107,20 +109,20 @@
 
     proto.next = function() {
         //console.log('next')
-        var currentNum = this.currentNum
+        var currentNum = this.opt.currentNum
         this.goto(++currentNum)
 
     }
 
     proto.prev = function() {
         //console.log('prev')
-        var currentNum = this.currentNum
+        var currentNum = this.opt.currentNum
         this.goto(--currentNum)
     }
 
     proto.gotoLast = function() {
         //console.log('gotoLast')
-        this.goto(self.lastNum)
+        this.goto(this.opt.totalNum)
     }
 
     proto.gotoFirst = function() {
