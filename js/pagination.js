@@ -18,54 +18,50 @@
             next: "next",
             goTo: 'go'
         },
+        setTotal: emptyFunc,
         callback: emptyFunc
     }
 
     function Pagination(opt) {
         var opt = $.extend({}, defaultOpt, opt || {}),
-            self = this
-
-        var c = $(opt.container),
+            self = this,
+            c = $(opt.container),
             api = opt.url || '/',
-            date = getCurrentDate(),
             dType = opt.dataType,
             label = opt.label,
-            cb = function(res){
-            	opt.callback(res)
-                var lastNum = res.hits.total
-                self.updatePagi(opt.currentNum, lastNum)
+            cb = function(res) {
+                opt.callback(res)
+                if (!opt.totalNum) opt.setTotal(res)
+                self.updatePagi(opt.currentNum, opt.totalNum)
+            },
+            ajaxObj = {
+                dataType: dType || 'json',
+                cache: false,
+                success: cb,
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown)
+                }
             }
-
-        //set jsonp callback in window obj
-        if (dType === 'jsonp') {
-            window._paginationCb = cb
-        }
 
         self.getPage = function(num) {
             if (!num || isNaN(num)) throw Error('pageNumber error')
             if (+num < 1 || +num > self.lastNum) return
             opt.currentNum = num
-            var params = 'date=' + date + '&page=' + num + '&size=' + opt.pageSize
+            var pagiParams = {
+                page: num,
+                size: opt.pageSize
+            }
 
-            $.ajax({
-                url: api + "?" + params,
-                dataType: dType || 'json',
-                cache: false,
-                jsonpCallback: '_paginationCb',
-                success: cb,
-                error: function(XMLHttpRequest, textStatus, errorThrown) {
-                    console.log(textStatus, errorThrown)
-                }
-            })
+            ajaxObj.url = addParams(api, pagiParams)
+            $.ajax(ajaxObj)
         }
 
         //update pagination's pageNumber
         self.updatePagi = function(currentNum, lastNum) {
-            self.currentNum = currentNum
-            self.lastNum = lastNum
+            opt.currentNum = currentNum
             var html = ''
             html += '<div class="pagi-contain"><ul class="pagi-list">'
-            html += '<li class="pagi-item"><span>' + currentNum + '/' + self.lastNum + '</span></li>'
+            html += '<li class="pagi-item"><span>' + currentNum + '/' + lastNum + '</span></li>'
             html += '<li class="pagi-item"><a href="#" class="pagi-link pagi-first' + ((currentNum == 1) ? " disabled" : "") + '">' + label.first + '</a></li>'
             html += '<li class="pagi-item"><a href="#" class="pagi-link pagi-prev' + ((currentNum == 1) ? " disabled" : "") + '">' + label.prev + '</a></li>'
             html += '<li class="pagi-item"><a href="#" class="pagi-link pagi-next' + ((lastNum == currentNum) ? " disabled" : "") + '">' + label.next + '</a></li>'
@@ -82,15 +78,15 @@
             })
             $('.pagi-contain').find('.pagi-prev').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
-                self.goto(self.currentNum - 1)
+                self.goto(opt.currentNum - 1)
             })
             $('.pagi-contain').find('.pagi-next').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
-                self.goto(self.currentNum + 1)
+                self.goto(opt.currentNum + 1)
             })
             $('.pagi-contain').find('.pagi-last').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
-                self.goto(self.lastNum)
+                self.goto(opt.totalNum)
             })
         }
 
@@ -132,14 +128,34 @@
         this.goto(1)
     }
 
-    function getCurrentDate() {
-        var t = new Date(),
-            y = t.getFullYear(),
-            m = t.getMonth() + 1,
-            d = t.getDate()
-        m = m < 10 ? ('0' + m) : m
-        d = d < 10 ? ('0' + d) : d
-        return '' + t.getFullYear() + m + d
+    /*
+     *	添加params方法
+     *	#标记和无value query自动删除
+     *	返回添加后的url
+     */
+    function addParams(url, paramsObj) {
+        try {
+            var result = url.match(new RegExp("[\?\&][^\?\&]+=[^\?\&]+", "g")),
+                source = url.replace(/\?.*/, ""),
+                queryString = ''
+            for (var k in paramsObj) {
+                queryString += "&" + k + "=" + paramsObj[k]
+            }
+            // console.log(result&result.length)
+            if (result) {
+                if (result.length > 0) {
+                    for (var i = 0; i < result.length; i++) {
+                        var p = result[i].replace(/[\?\&]/, "")
+                        queryString += "&" + p
+                    }
+                }
+            }
+            queryString = queryString.replace(/^\&/, "")
+
+            return source + "?" + queryString
+        } catch (e) {
+            throw Error("addParams error")
+        }
     }
 
 
