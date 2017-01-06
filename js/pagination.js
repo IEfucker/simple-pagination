@@ -3,13 +3,15 @@
  *	response total
  */
 
-;
-(function() {
+define(function(require, exports, module) {
+	var $ = require("jquery")
     var emptyFunc = function() {}
     var defaultOpt = {
         container: "body",
         startNum: 1,
         pageSize: 10,
+        pageNumParamName:'page',
+        pageSizeParamName:'size',
         currentNum: null,
         label: {
             first: "first",
@@ -25,12 +27,12 @@
     function Pagination(opt) {
         var opt = $.extend({}, defaultOpt, opt || {}),
             self = this,
-            c = $(opt.container),
+            c = typeof opt.container === 'string'?$(opt.container):opt.container,
             api = opt.url || '/',
             dType = opt.dataType,
             label = opt.label,
             cb = function(res) {
-                opt.callback(res)
+                opt.pageCb(res)
                 if (!opt.totalNum) opt.setTotal(res)
                 self.updatePagi(opt.currentNum, opt.totalNum)
             },
@@ -49,10 +51,9 @@
             if (!num || isNaN(num)) throw Error('pageNumber error')
             if (+num < 1 || +num > self.lastNum) return
             opt.currentNum = num
-            var pagiParams = {
-                page: num,
-                size: opt.pageSize
-            }
+            var pagiParams = {}
+            pagiParams[opt.pageNumParamName] = num
+            pagiParams[opt.pageSizeParamName] = opt.pageSize
 
             ajaxObj.url = addParams(api, pagiParams)
             $.ajax(ajaxObj)
@@ -64,29 +65,29 @@
             var html = ''
             html += '<div class="pagi-contain"><ul class="pagi-list">'
             html += '<li class="pagi-item"><span>' + currentNum + '/' + lastNum + '</span></li>'
-            html += '<li class="pagi-item"><a href="#" class="pagi-link pagi-first' + ((currentNum == 1) ? " disabled" : "") + '">' + label.first + '</a></li>'
-            html += '<li class="pagi-item"><a href="#" class="pagi-link pagi-prev' + ((currentNum == 1) ? " disabled" : "") + '">' + label.prev + '</a></li>'
-            html += '<li class="pagi-item"><a href="#" class="pagi-link pagi-next' + ((lastNum == currentNum) ? " disabled" : "") + '">' + label.next + '</a></li>'
-            html += '<li class="pagi-item"><a href="#" class="pagi-link pagi-last' + ((lastNum == currentNum) ? " disabled" : "") + '">' + label.last + '</a></li>'
+            html += '<li class="pagi-item"><a href="javascript:;" class="pagi-link pagi-first' + ((currentNum == 1) ? " disabled" : "") + '">' + label.first + '</a></li>'
+            html += '<li class="pagi-item"><a href="javascript:;" class="pagi-link pagi-prev' + ((currentNum == 1) ? " disabled" : "") + '">' + label.prev + '</a></li>'
+            html += '<li class="pagi-item"><a href="javascript:;" class="pagi-link pagi-next' + ((lastNum == currentNum) ? " disabled" : "") + '">' + label.next + '</a></li>'
+            html += '<li class="pagi-item"><a href="javascript:;" class="pagi-link pagi-last' + ((lastNum == currentNum) ? " disabled" : "") + '">' + label.last + '</a></li>'
             html += '<li class="pagi-item"><input type="text" class="pagi-goto-num" value="' + currentNum + '">'
             html += '<a class="pagi-link pagi-goto-btn" href="#">' + label.goTo + '</a></li></ul></div>'
-
+            // console.log(html)
             c.html(html)
 
             //event bind
-            $('.pagi-contain').find('.pagi-first').on("click", function(e) {
+            c.find('.pagi-first').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
                 self.gotoFirst()
             })
-            $('.pagi-contain').find('.pagi-prev').on("click", function(e) {
+            c.find('.pagi-prev').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
                 self.prev()
             })
-            $('.pagi-contain').find('.pagi-next').on("click", function(e) {
+            c.find('.pagi-next').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
                 self.next()
             })
-            $('.pagi-contain').find('.pagi-last').on("click", function(e) {
+            c.find('.pagi-last').on("click", function(e) {
                 if ($(this).hasClass('disabled')) return
                 self.gotoLast()
             })
@@ -161,5 +162,5 @@
     }
 
 
-    window.Pagination = Pagination
-}());
+    module.exports = Pagination
+})
