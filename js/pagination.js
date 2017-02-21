@@ -2,16 +2,15 @@
  *	api query date=20161104&page=0&size=10
  *	response total
  */
-
-define(function(require, exports, module) {
-	var $ = require("jquery")
-    var emptyFunc = function() {}
+; (function (global) {
+    var $ = global.$
+    var emptyFunc = function () { }
     var defaultOpt = {
         container: "body",
         startNum: 1,
         pageSize: 10,
-        pageNumParamName:'page',
-        pageSizeParamName:'size',
+        pageNumParamName: 'page',
+        pageSizeParamName: 'size',
         currentNum: null,
         label: {
             first: "first",
@@ -27,11 +26,11 @@ define(function(require, exports, module) {
     function Pagination(opt) {
         var opt = $.extend({}, defaultOpt, opt || {}),
             self = this,
-            c = typeof opt.container === 'string'?$(opt.container):opt.container,
+            c = typeof opt.container === 'string' ? $(opt.container) : opt.container,
             api = opt.url || '/',
             dType = opt.dataType,
             label = opt.label,
-            cb = function(res) {
+            cb = function (res) {
                 opt.pageCb(res)
                 if (!opt.totalNum) opt.setTotal(res)
                 self.updatePagi(opt.currentNum, opt.totalNum)
@@ -40,14 +39,14 @@ define(function(require, exports, module) {
                 dataType: dType || 'json',
                 cache: false,
                 success: cb,
-                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
                     console.log(textStatus, errorThrown)
                 }
             }
 
         self.opt = opt
 
-        self.getPage = function(num) {
+        self.getPage = function (num) {
             if (!num || isNaN(num)) throw Error('pageNumber error')
             if (+num < 1 || +num > self.lastNum) return
             opt.currentNum = num
@@ -60,7 +59,7 @@ define(function(require, exports, module) {
         }
 
         //update pagination's pageNumber
-        self.updatePagi = function(currentNum, lastNum) {
+        self.updatePagi = function (currentNum, lastNum) {
             opt.currentNum = currentNum
             var html = ''
             html += '<div class="pagi-contain"><ul class="pagi-list">'
@@ -75,19 +74,19 @@ define(function(require, exports, module) {
             c.html(html)
 
             //event bind
-            c.find('.pagi-first').on("click", function(e) {
+            c.find('.pagi-first').on("click", function (e) {
                 if ($(this).hasClass('disabled')) return
                 self.gotoFirst()
             })
-            c.find('.pagi-prev').on("click", function(e) {
+            c.find('.pagi-prev').on("click", function (e) {
                 if ($(this).hasClass('disabled')) return
                 self.prev()
             })
-            c.find('.pagi-next').on("click", function(e) {
+            c.find('.pagi-next').on("click", function (e) {
                 if ($(this).hasClass('disabled')) return
                 self.next()
             })
-            c.find('.pagi-last').on("click", function(e) {
+            c.find('.pagi-last').on("click", function (e) {
                 if ($(this).hasClass('disabled')) return
                 self.gotoLast()
             })
@@ -101,32 +100,32 @@ define(function(require, exports, module) {
 
     var proto = Pagination.prototype;
 
-    proto.goto = function(num) {
+    proto.goto = function (num) {
         if (isNaN(num)) throw Error("page number type error: " + num)
         num = +num
-            //console.log(num)
+        //console.log(num)
         this.getPage(num)
     }
 
-    proto.next = function() {
+    proto.next = function () {
         //console.log('next')
         var currentNum = this.opt.currentNum
         this.goto(++currentNum)
 
     }
 
-    proto.prev = function() {
+    proto.prev = function () {
         //console.log('prev')
         var currentNum = this.opt.currentNum
         this.goto(--currentNum)
     }
 
-    proto.gotoLast = function() {
+    proto.gotoLast = function () {
         //console.log('gotoLast')
         this.goto(this.opt.totalNum)
     }
 
-    proto.gotoFirst = function() {
+    proto.gotoFirst = function () {
         //console.log('gotoFirst')
         this.goto(1)
     }
@@ -162,5 +161,18 @@ define(function(require, exports, module) {
     }
 
 
-    module.exports = Pagination
-})
+    if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
+
+        // AMD. Register as an anonymous module.
+        define(function () {
+            return Pagination;
+        });
+    } else if (typeof module !== 'undefined' && module.exports) {
+        module.exports = Pagination.attach;
+        module.exports.Pagination = Pagination;
+    } else {
+        window.Pagination = Pagination;
+    }
+}(this))
+
+
